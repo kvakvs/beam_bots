@@ -1,0 +1,8 @@
+﻿  ConfigurationType : Application
+  Configuration     : DebugDEXE
+  PlatformToolset   : v140
+  TargetPath        : J:\Projects\zeromq-4.1.5\builds\msvc\vs2013\inproc_thr\..\..\..\..\bin\Win32\Debug\v140\dynamic\inproc_thr.exe
+  Linkage-libzmq    : dynamic
+  Linkage-libsodium : dynamic
+  inproc_thr.cpp
+LINK : fatal error LNK1104: cannot open file 'libsodium.lib'

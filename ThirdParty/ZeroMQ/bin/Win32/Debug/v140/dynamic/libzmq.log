@@ -1,0 +1,90 @@
+﻿  ConfigurationType : DynamicLibrary
+  Configuration     : DebugDLL
+  PlatformToolset   : v140
+  TargetPath        : J:\Projects\zeromq-4.1.5\builds\msvc\vs2013\libzmq\..\..\..\..\bin\Win32\Debug\v140\dynamic\libzmq.dll
+  Option-openpgm    : 
+  Option-sodium     : true
+  Option-gssapi     : 
+  Linkage-libsodium : dynamic
+  address.cpp
+  clock.cpp
+  ctx.cpp
+  curve_client.cpp
+  curve_server.cpp
+  dealer.cpp
+  devpoll.cpp
+  dist.cpp
+  epoll.cpp
+  err.cpp
+  fq.cpp
+  gssapi_client.cpp
+  gssapi_mechanism_base.cpp
+  gssapi_server.cpp
+  io_object.cpp
+  io_thread.cpp
+  ip.cpp
+  ipc_address.cpp
+  ipc_connecter.cpp
+  ipc_listener.cpp
+  kqueue.cpp
+  lb.cpp
+  mailbox.cpp
+  mechanism.cpp
+  metadata.cpp
+  msg.cpp
+  mtrie.cpp
+  null_mechanism.cpp
+  object.cpp
+  options.cpp
+  own.cpp
+  pair.cpp
+  pgm_receiver.cpp
+  pgm_sender.cpp
+  pgm_socket.cpp
+  pipe.cpp
+  plain_client.cpp
+..\..\..\..\src\options.cpp(110): warning C4267: '=': conversion from 'size_t' to 'unsigned char', possible loss of data
+  plain_server.cpp
+  poll.cpp
+  poller_base.cpp
+  precompiled.cpp
+  proxy.cpp
+..\..\..\..\src\plain_server.cpp(278): warning C4267: '=': conversion from 'size_t' to 'char', possible loss of data
+  pub.cpp
+  pull.cpp
+  push.cpp
+  random.cpp
+  raw_decoder.cpp
+  raw_encoder.cpp
+  reaper.cpp
+  rep.cpp
+  req.cpp
+  router.cpp
+  select.cpp
+  session_base.cpp
+  signaler.cpp
+  socket_base.cpp
+  socks.cpp
+  socks_connecter.cpp
+  stream.cpp
+..\..\..\..\src\socks.cpp(68): warning C4267: '=': conversion from 'size_t' to 'uint8_t', possible loss of data
+..\..\..\..\src\socks.cpp(176): warning C4267: '=': conversion from 'size_t' to 'unsigned char', possible loss of data
+  stream_engine.cpp
+  sub.cpp
+  tcp.cpp
+  tcp_address.cpp
+  tcp_connecter.cpp
+  tcp_listener.cpp
+..\..\..\..\src\stream.cpp(299): warning C4267: '=': conversion from 'size_t' to 'unsigned char', possible loss of data
+  thread.cpp
+  trie.cpp
+  v1_decoder.cpp
+  v1_encoder.cpp
+  v2_decoder.cpp
+  v2_encoder.cpp
+  xpub.cpp
+  xsub.cpp
+  zmq.cpp
+  zmq_utils.cpp
+..\..\..\..\src\zmq.cpp(642): warning C4244: 'return': conversion from 'int64_t' to 'int', possible loss of data
+LINK : fatal error LNK1104: cannot open file 'libsodium.lib'

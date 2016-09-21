@@ -1,0 +1,8 @@
+Binaries/*
+Intermediate/*
+Saved/*
+Build/*
+
+.vs
+*.VC.db
+*.VC.opendb

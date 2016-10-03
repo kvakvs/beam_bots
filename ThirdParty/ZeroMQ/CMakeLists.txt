@@ -533,10 +533,10 @@ foreach(source ${TWEETNACL_SOURCES})
   list(APPEND sources ${CMAKE_CURRENT_SOURCE_DIR}/${source})
 endforeach()
 
-#foreach(source ${rc-sources})
-#  list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/${source})
-#  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/${source}.in ${CMAKE_CURRENT_BINARY_DIR}/${source})
-#endforeach()
+foreach(source ${rc-sources})
+  list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/${source})
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/${source}.in ${CMAKE_CURRENT_BINARY_DIR}/${source})
+endforeach()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/builds/cmake/platform.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/platform.hpp)
 list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/platform.hpp)
@@ -709,7 +709,6 @@ endif()
 # tests
 
 set(ZMQ_BUILD_TESTS ON CACHE BOOL "Build the tests for ZeroMQ")
-set(ZMQ_BUILD_TESTS OFF)
 
 if(ZMQ_BUILD_TESTS)
   enable_testing() # Enable testing only works in root scope

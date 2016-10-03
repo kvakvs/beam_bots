@@ -11,7 +11,8 @@ UCLASS(minimalapi)
 class ABEAMBotsGameMode : public AGameMode
 {
     GENERATED_BODY()
-    std::unique_ptr<BotZMQ> zmq_;
+    //std::unique_ptr<BotZMQ> zmq_;
+    TUniquePtr<BotZMQ> zmq_;
 
 public:
     ABEAMBotsGameMode();

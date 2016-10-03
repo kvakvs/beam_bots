@@ -17,7 +17,8 @@ ABEAMBotsGameMode::ABEAMBotsGameMode(): AGameMode()
 
 void ABEAMBotsGameMode::zmq_listen(uint32 port)
 {
-    zmq_ = std::make_unique<BotZMQ>(port);
+    //zmq_ = std::make_unique<BotZMQ>(port);
+    zmq_.Reset(new BotZMQ(port));
 }
 
 void ABEAMBotsGameMode::StartPlay()

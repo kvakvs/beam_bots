@@ -1,2 +1,9 @@
+.deps/*
+.libs/*
+*.Plo
+*.Po
+*.dylib
+*.o
+
 _build/*
 _build64/*

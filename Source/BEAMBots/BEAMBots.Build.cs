@@ -36,6 +36,16 @@ public class BEAMBots : ModuleRules {
                 Path.Combine(LibrariesPath, "libzmq-v140-mt-" + LibStatic + LibDebug + "-4_1_5.lib"));
         }
 
+        if (tgt.Platform == UnrealTargetPlatform.Mac) {
+            isLibrarySupported = true;
+
+            //string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
+            string LibrariesPath = Path.Combine(ThirdPartyPath, "ZeroMQ", ".libs");
+
+            PublicAdditionalLibraries.Add(
+                Path.Combine(LibrariesPath, "libzmq.a"));
+        }
+
         if (isLibrarySupported) {
             // Include path
             PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "ZeroMQ", "include"));

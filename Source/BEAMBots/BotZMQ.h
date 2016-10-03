@@ -1,9 +1,13 @@
 #pragma once
 
-#include "AllowWindowsPlatformTypes.h"
+#ifdef _WIN32
+    #include "AllowWindowsPlatformTypes.h"
+#endif
 #include <zmq.hpp>
 #undef PF_MAX
-#include "HideWindowsPlatformTypes.h"
+#ifdef _WIN32
+    #include "HideWindowsPlatformTypes.h"
+#endif
 
 #include "UnrealString.h"
 

@@ -2,16 +2,15 @@
 
 #include "BEAMBots.h"
 #include "BEAMBotsGameMode.h"
-//#include "BEAMBotsPawn.h"
-#include "BrickPawn.h"
 #include "BEAMBotsHud.h"
+#include "BEAMBotsToyCar.h"
 
 #include "Runtime/Engine/Classes/Engine/World.h"
 
 ABEAMBotsGameMode::ABEAMBotsGameMode(): AGameMode()
 {
     //DefaultPawnClass = ABEAMBotsPawn::StaticClass();
-    DefaultPawnClass = ABrickPawn::StaticClass();
+    DefaultPawnClass = ABEAMBotsToycar::StaticClass();
     HUDClass = ABEAMBotsHud::StaticClass();
 }
 
@@ -29,5 +28,6 @@ void ABEAMBotsGameMode::StartPlay()
     case EWorldType::PIE:
         zmq_listen(15000); 
     }
+    
     AGameMode::StartPlay();
 }

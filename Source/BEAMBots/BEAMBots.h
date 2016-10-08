@@ -1,10 +1,9 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+#pragma once
 
-#ifndef __BEAMBOTS_H__
-#define __BEAMBOTS_H__
 
+#include "Engine.h"
 #include "CoreUObject.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 #define HMD_MODULE_INCLUDED 0
-
-#endif

@@ -21,14 +21,15 @@ ABEAMBotsToycar::ABEAMBotsToycar()
     construct_physics();
 }
 
+void ABEAMBotsToycar::setup_mesh_component_as_phys(UStaticMeshComponent *comp) {
+    comp->SetNotifyRigidBodyCollision(true);
+    comp->SetSimulatePhysics(true);
+    comp->SetCanEverAffectNavigation(false);
+    comp->SetEnableGravity(true);
+}
+
 void ABEAMBotsToycar::construct_geometry() {
     car_mesh_ = CreateDefaultSubobject<UStaticMeshComponent>("Body");
-    car_mesh_->BodyInstance.bSimulatePhysics = true;
-    car_mesh_->BodyInstance.bNotifyRigidBodyCollision = true;
-    car_mesh_->BodyInstance.bUseCCD = true;
-    car_mesh_->bGenerateOverlapEvents = true;
-    car_mesh_->SetCanEverAffectNavigation(false);
-    car_mesh_->SetWorldScale3D(FVector(2.0, 2.0, 2.0));
     RootComponent = car_mesh_;
 
     // Car mesh
@@ -36,10 +37,13 @@ void ABEAMBotsToycar::construct_geometry() {
     car_mesh_->SetStaticMesh(car_helper.Object);
     car_mesh_->SetMobility(EComponentMobility::Movable);
 
+    setup_mesh_component_as_phys(car_mesh_);
+    car_mesh_->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
+    car_mesh_->BodyInstance.bUseCCD = true;
+    car_mesh_->bGenerateOverlapEvents = true;
+    car_mesh_->AddTorque(FVector(1000.f, 2000.f, 3000.f));
+
     // Car mesh - Collision
-    //car_mesh_->SetCollisionObjectType(COLL_CHANNEL_CAR);
-    //car_mesh_->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-    //car_mesh_->SetCollisionResponseToChannel(COLL_CHANNEL_WHEEL, ECollisionResponse::ECR_Ignore);
     FCollisionResponseContainer crc(ECollisionResponse::ECR_Block);
     crc.SetResponse(COLL_CHANNEL_WHEEL, ECollisionResponse::ECR_Ignore);
     car_mesh_->SetCollisionResponseToChannels(crc);
@@ -67,10 +71,12 @@ AStaticMeshActor *ABEAMBotsToycar::spawn_wheel(
     ensure(w);
     
     FActorSpawnParameters spawn;
-    spawn.Name = *name;
+    spawn.Name = FName(*name);
     spawn.Owner = this;
     auto wheel = w->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), spawn);
     ensure(wheel);
+    ensure(wheel->GetOwner() == this);
+    wheel->SetActorLabel(name, true);
     
     auto meshc = wheel->GetStaticMeshComponent();
     meshc->SetMobility(EComponentMobility::Movable);
@@ -83,7 +89,11 @@ AStaticMeshActor *ABEAMBotsToycar::spawn_wheel(
     crc.SetResponse(COLL_CHANNEL_CAR, ECollisionResponse::ECR_Ignore);
     meshc->SetCollisionResponseToChannels(crc);
 
-    wheel->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(*socket_name));
+    wheel->AttachToActor(this,
+        FAttachmentTransformRules::SnapToTargetIncludingScale,
+        FName(*socket_name));
+
+    setup_mesh_component_as_phys(meshc);
 
     //UE_LOG(LogText, Warning, "Spawn wheel actor=%p", wheel);
     return wheel;
@@ -107,33 +117,52 @@ ABEAMBotsToycar::construct_wheel_constraint(const FString & comp_name)
     return phys;
 }
 
+void ABEAMBotsToycar::setup_physics_motor_wheel(UPhysicsConstraintComponent * phys)
+{
+    phys->SetAngularVelocityDrive(false, true);
+    phys->SetAngularVelocityTarget(FVector(0.0f, 0.0f, 0.0f));
+    phys->SetAngularDriveParams(50.0f, 50.0f, 500.0f);
+
+    auto &ad = phys->ConstraintInstance.ProfileInstance.AngularDrive;
+    ad.AngularDriveMode = EAngularDriveMode::TwistAndSwing;
+    ad.TwistDrive.bEnableVelocityDrive = true;
+
+    phys->SetIniti
+    phys->InitializeComponent();
+}
+
 void ABEAMBotsToycar::setup_physics_on_play()
 {
-    ensure(phys_wheel_fr_);
-    ensure(phys_wheel_fl_);
-    ensure(phys_wheel_br_);
-    ensure(phys_wheel_bl_);
-    ensure(wheel_fr_);
-    ensure(wheel_fl_);
-    ensure(wheel_br_);
-    ensure(wheel_bl_);
+    ensure(phys_wheel_fr_);ensure(phys_wheel_fl_);ensure(phys_wheel_br_);ensure(phys_wheel_bl_);
+    ensure(wheel_fr_);ensure(wheel_fl_);ensure(wheel_br_);ensure(wheel_bl_);
+
     setup_physics_constraint(phys_wheel_fr_, wheel_fr_);
     setup_physics_constraint(phys_wheel_fl_, wheel_fl_);
+    setup_physics_motor_wheel(phys_wheel_fr_);
+    setup_physics_motor_wheel(phys_wheel_fl_);
+
     setup_physics_constraint(phys_wheel_br_, wheel_br_);
     setup_physics_constraint(phys_wheel_bl_, wheel_bl_);
 }
 
 void ABEAMBotsToycar::setup_physics_constraint(UPhysicsConstraintComponent *phys,
-                                               AStaticMeshActor *wheel) {
+                                               AActor *wheel) {
+    phys->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 0.0f);
+    phys->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.0f);
+    phys->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Free, 0.0f);
+
+    phys->SetLinearXLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
+    phys->SetLinearYLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
+    phys->SetLinearZLimit(ELinearConstraintMotion::LCM_Locked, 0.0f);
+
     phys->ConstraintActor1 = this;
     phys->ConstraintActor2 = wheel;
+    //phys->SetDisableCollision(true);
 }
 
 // Called when the game starts or when spawned
 void ABEAMBotsToycar::BeginPlay()
 {
-    Super::BeginPlay();
-
     spawn_wheels();
     setup_physics_on_play();
 
@@ -146,6 +175,8 @@ void ABEAMBotsToycar::BeginPlay()
             break;
         }
     }
+
+    Super::BeginPlay();
 }
 
 // Called every frame
@@ -165,20 +196,13 @@ void ABEAMBotsToycar::SetupPlayerInputComponent(class UInputComponent* pic)
 }
 
 void ABEAMBotsToycar::on_move_forward(float v) {
-    double powr = v == 0.0 ? 0.0 : (v > 0 ? 10.0 : -10.0);
+    const double STRENGTH = 50.0f;
+    double powr = v == 0.0f ? 0.0f : (v > 0 ? STRENGTH : -STRENGTH);
 
-    TArray<UActorComponent*> comps;
-    GetComponents(comps);
-
-    if (powr) { UE_LOG(LogTemp, Warning, TEXT("BEAMBots Car: on forward")); }
-
-    for (int i = 0; i < comps.Num(); ++i) {
-        auto name = comps[i]->GetName();
-        if (name == "PC_WheelFR" || name == "PC_WheelFL") {
-            auto pc = Cast<UPhysicsConstraintComponent>(comps[i]);
-            pc->SetAngularVelocityTarget(FVector(0.0, powr, 0.0));
-        }
-    }
+    //if (powr != 0.f) {
+        phys_wheel_fr_->SetAngularVelocityTarget(FVector(0.0, powr, 0.0));
+        phys_wheel_fl_->SetAngularVelocityTarget(FVector(0.0, powr, 0.0));
+    //}
 }
 
 void ABEAMBotsToycar::on_move_right(float v) {

@@ -8,6 +8,8 @@
 
 // #define OBSERVER_CAMERA_NAME "TopCamera"
 #define OBSERVER_CAMERA_NAME "TopCloseupCamera"
+const ECollisionChannel COLL_CHANNEL_WHEEL = ECollisionChannel::ECC_GameTraceChannel1;
+const ECollisionChannel COLL_CHANNEL_CAR = ECollisionChannel::ECC_GameTraceChannel2;
 
 // Sets default values
 ABEAMBotsToycar::ABEAMBotsToycar()
@@ -21,7 +23,6 @@ ABEAMBotsToycar::ABEAMBotsToycar()
 
 void ABEAMBotsToycar::construct_geometry() {
     car_mesh_ = CreateDefaultSubobject<UStaticMeshComponent>("Body");
-    car_mesh_->SetCollisionProfileName(TEXT("CollideChannelCar"));
     car_mesh_->BodyInstance.bSimulatePhysics = true;
     car_mesh_->BodyInstance.bNotifyRigidBodyCollision = true;
     car_mesh_->BodyInstance.bUseCCD = true;
@@ -34,6 +35,14 @@ void ABEAMBotsToycar::construct_geometry() {
     static ConstructorHelpers::FObjectFinder<UStaticMesh> car_helper(TEXT("/Game/ToyCars/ToyCar1"));
     car_mesh_->SetStaticMesh(car_helper.Object);
     car_mesh_->SetMobility(EComponentMobility::Movable);
+
+    // Car mesh - Collision
+    //car_mesh_->SetCollisionObjectType(COLL_CHANNEL_CAR);
+    //car_mesh_->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+    //car_mesh_->SetCollisionResponseToChannel(COLL_CHANNEL_WHEEL, ECollisionResponse::ECR_Ignore);
+    FCollisionResponseContainer crc(ECollisionResponse::ECR_Block);
+    crc.SetResponse(COLL_CHANNEL_WHEEL, ECollisionResponse::ECR_Ignore);
+    car_mesh_->SetCollisionResponseToChannels(crc);
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> wheel_helper(TEXT("/Game/ToyCars/ToyWheel"));
     wheel_mesh_ = wheel_helper.Object;
@@ -66,7 +75,13 @@ AStaticMeshActor *ABEAMBotsToycar::spawn_wheel(
     auto meshc = wheel->GetStaticMeshComponent();
     meshc->SetMobility(EComponentMobility::Movable);
     meshc->SetStaticMesh(wheel_mesh_);
-    meshc->SetCollisionProfileName(TEXT("CollideChannelWheel"));
+    
+    // Collision Query/Response
+    meshc->SetCollisionObjectType(COLL_CHANNEL_WHEEL);
+    FCollisionResponseContainer crc(ECollisionResponse::ECR_Block);
+    crc.SetResponse(COLL_CHANNEL_WHEEL, ECollisionResponse::ECR_Ignore);
+    crc.SetResponse(COLL_CHANNEL_CAR, ECollisionResponse::ECR_Ignore);
+    meshc->SetCollisionResponseToChannels(crc);
 
     wheel->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(*socket_name));
 
@@ -108,10 +123,8 @@ void ABEAMBotsToycar::setup_physics_on_play()
     setup_physics_constraint(phys_wheel_bl_, wheel_bl_);
 }
 
-void ABEAMBotsToycar::setup_physics_constraint(
-    UPhysicsConstraintComponent *phys,
-    AStaticMeshActor *wheel) 
-{
+void ABEAMBotsToycar::setup_physics_constraint(UPhysicsConstraintComponent *phys,
+                                               AStaticMeshActor *wheel) {
     phys->ConstraintActor1 = this;
     phys->ConstraintActor2 = wheel;
 }

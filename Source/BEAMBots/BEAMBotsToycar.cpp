@@ -127,8 +127,8 @@ void ABEAMBotsToycar::setup_physics_motor_wheel(UPhysicsConstraintComponent * ph
     ad.AngularDriveMode = EAngularDriveMode::TwistAndSwing;
     ad.TwistDrive.bEnableVelocityDrive = true;
 
-    phys->SetIniti
-    phys->InitializeComponent();
+    //phys->SetIniti
+    //phys->InitializeComponent();
 }
 
 void ABEAMBotsToycar::setup_physics_on_play()

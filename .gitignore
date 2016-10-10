@@ -3,6 +3,9 @@ Intermediate/*
 Saved/*
 Build/*
 
+# Blender backups
+*.blend1
+
 .vs
 *.VC.db
 *.VC.opendb
@@ -69,3 +72,11 @@ Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+.DS_Store
+*.xcworkspace/*
+
+# IntelliJ
+.idea/*
+*.iml
+UE4Source
+UE4Source/*

@@ -5,6 +5,7 @@
 #include "GameFramework/Pawn.h"
 
 class UPhysicsConstraintComponent;
+class ABEAMBotsToycar;
 
 #include "BEAMBotsToycar.generated.h"
 
@@ -13,28 +14,36 @@ class BEAMBOTS_API ABEAMBotsToycar : public APawn
 {
     GENERATED_BODY()
 
+public:
     UStaticMeshComponent *car_mesh_;
 
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     UStaticMesh *wheel_mesh_ = nullptr;
 
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     AStaticMeshActor *wheel_fr_ = nullptr;
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     AStaticMeshActor *wheel_fl_ = nullptr;
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     AStaticMeshActor *wheel_br_ = nullptr;
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     AStaticMeshActor *wheel_bl_ = nullptr;
 
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     UPhysicsConstraintComponent *phys_wheel_fr_ = nullptr;
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     UPhysicsConstraintComponent *phys_wheel_fl_ = nullptr;
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     UPhysicsConstraintComponent *phys_wheel_br_ = nullptr;
-    UPROPERTY(Category = Car, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+ 
+    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     UPhysicsConstraintComponent *phys_wheel_bl_ = nullptr;
+    
 public:
     // Sets default values for this pawn's properties
     ABEAMBotsToycar();
@@ -60,7 +69,9 @@ private:
 
     void construct_physics();
     void setup_physics_on_play();
-    void setup_physics_constraint(UPhysicsConstraintComponent *phys, AActor *wheel);
+    void setup_physics_constraint(UPhysicsConstraintComponent *phys,
+                                  AActor *wheel,
+                                  const FString &socket_name);
     UPhysicsConstraintComponent *construct_wheel_constraint(const FString &comp_name);
     void setup_physics_motor_wheel(UPhysicsConstraintComponent *phys);
 };

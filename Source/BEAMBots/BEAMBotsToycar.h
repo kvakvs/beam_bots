@@ -6,6 +6,8 @@
 //#include "SkeletalMeshActor.h"
 
 class UPhysicsConstraintComponent;
+class UCameraComponent;
+class USpringArmComponent;
 
 #include "BEAMBotsToycar.generated.h"
 
@@ -18,19 +20,16 @@ public:
     UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
     USkeletalMeshComponent *mesh_;
 
-//    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-//    UPhysicsConstraintComponent *phys_wheel_fr_ = nullptr;
-    FBodyInstance *phys_wheel_fr_ = nullptr;
+    UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    USpringArmComponent* spring_arm_;
     
-//    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-//    UPhysicsConstraintComponent *phys_wheel_fl_ = nullptr;
-    FBodyInstance *phys_wheel_fl_ = nullptr;
+    // Camera component that will be our viewpoint
+    UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UCameraComponent* cam_;
     
-//    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-//    UPhysicsConstraintComponent *phys_wheel_br_ = nullptr;
- 
-//    UPROPERTY(Category=Car, VisibleDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-//    UPhysicsConstraintComponent *phys_wheel_bl_ = nullptr;
+    // Controls affect power on the engines
+    enum class DrivePower: int { BR, BL, FL, FR };
+    FVector drive_power_[4];
     
 public:
     // Sets default values for this pawn's properties

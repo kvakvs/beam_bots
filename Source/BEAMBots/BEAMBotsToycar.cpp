@@ -32,9 +32,9 @@ void ABEAMBotsToycar::construct_geometry() {
     mesh_->SetSimulatePhysics(true);
     
     // Color+material
-    static ConstructorHelpers::FObjectFinder<UMaterial> material_helper(
-        TEXT("Material'/Game/Materials/CarPaint/M_CarPaint'"));
-    mesh_->SetMaterial(0, material_helper.Object);
+    //static ConstructorHelpers::FObjectFinder<UMaterial> material_helper(
+    //    TEXT("Material'/Game/Materials/CarPaint/M_CarPaint'"));
+    //mesh_->SetMaterial(0, material_helper.Object);
 
     SetRootComponent(mesh_);
     
@@ -55,6 +55,11 @@ void ABEAMBotsToycar::construct_geometry() {
     cam_->SetupAttachment(spring_arm_, USpringArmComponent::SocketName);
     cam_->bUsePawnControlRotation = false;
     cam_->FieldOfView = 90.f;
+
+    //auto l = CreateDefaultSubobject<UPointLightComponent>(TEXT("FullBeam"));
+    //l->SetRelativeLocation(FVector(60.f, -10.f, 120.f));
+    //l->SetRelativeRotation(FRotator(-180.f, -10.f, -90.f));
+    //l->SetIntensity(25000.f);
 }
 
 // Called when the game starts or when spawned
@@ -68,23 +73,30 @@ void ABEAMBotsToycar::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (drive_power_[0].SizeSquared() > 1.0f) {
+    if (wake_flag_) {
+        wake_flag_ = false;
         mesh_->WakeAllRigidBodies();
     }
     for (auto i = 0; i < mesh_->Constraints.Num(); ++i) {
         mesh_->Constraints[i]->SetAngularVelocityTarget(drive_power_[i]);
     }
-//    FVector fl = drive_power_fl_;
-//    fl.Normalize();
-//    fl *= 1000.f;
-//    mesh_->AddImpulseAtLocation(drive_power_fl_,
-//                                mesh_->Constraints[2]->GetConstraintLocation());
-//
-//    FVector fr = drive_power_fr_;
-//    fr.Normalize();
-//    fr *= 1000.f;
-//    mesh_->AddImpulseAtLocation(fr,
-//                                mesh_->Constraints[3]->GetConstraintLocation());
+
+    FVector dir = FRotationMatrix(GetActorRotation()).GetScaledAxis(EAxis::X);
+    dir.Normalize();
+
+    FVector fl = drive_power_[DrivePower_FL];
+    fl.Normalize();
+    fl *= 2000.f;
+    fl *= dir;
+    mesh_->AddImpulseAtLocation(
+        fl, mesh_->Constraints[DrivePower_FL]->GetConstraintLocation());
+
+    FVector fr = drive_power_[DrivePower_FR];
+    fr.Normalize();
+    fr *= 2000.f;
+    fr *= dir;
+    mesh_->AddImpulseAtLocation(
+        fr, mesh_->Constraints[DrivePower_FR]->GetConstraintLocation());
 }
 
 // Called to bind functionality to input
@@ -96,17 +108,31 @@ void ABEAMBotsToycar::SetupPlayerInputComponent(class UInputComponent* pic)
     pic->BindAxis("MoveRight", this, &ABEAMBotsToycar::on_move_right);
 }
 
+// Converts input from player controller to physical angular velocity for
+// applying to wheels.
+static float input_v_to_angular_velocity(float v) {
+    const double ROT_VELOCITY = 90.0f;
+    return (FMath::Abs(v) <= 0.01f)
+        ? 0.0f
+        : (v > 0.0f ? ROT_VELOCITY : -ROT_VELOCITY);
+}
+
+static FVector get_power_vector(float power) {
+    return FVector(0.f, power, 0.f);
+}
+
 void ABEAMBotsToycar::on_move_forward(float v) {
-    const double STRENGTH = 1500.0f; // positive strength rotates backwards
-    float powr = (FMath::Abs(v) <= 0.01f)
-                 ? 0.0f
-                 : (v > 0.0f ? STRENGTH : -STRENGTH);
-    for (auto i = 0; i < mesh_->Constraints.Num(); ++i) {
-        // Crutch for BL wheel being oriented against the others
-        float sign1 = (i == 1) ? 1.0f : -1.0f;
-        drive_power_[i] = FVector(sign1 * powr, 0.f, 0.f);
-    }
+    float powr = input_v_to_angular_velocity(v);
+    wake_flag_ |= FMath::Abs(v) > 0.1f;
+    drive_power_[DrivePower_FL] = drive_power_[DrivePower_BL] = get_power_vector(powr);
+    drive_power_[DrivePower_FR] = drive_power_[DrivePower_BR] = get_power_vector(powr);
 }
 
 void ABEAMBotsToycar::on_move_right(float v) {
+    float powr = input_v_to_angular_velocity(v) * 1.2f;
+    if (FMath::Abs(v) > 0.1f) {
+        wake_flag_ |= true;
+        drive_power_[DrivePower_FL] = drive_power_[DrivePower_BL] = get_power_vector(powr);
+        drive_power_[DrivePower_FR] = drive_power_[DrivePower_BR] = get_power_vector(-powr);
+    }
 }

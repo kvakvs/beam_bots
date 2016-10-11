@@ -28,8 +28,15 @@ public:
     UCameraComponent* cam_;
     
     // Controls affect power on the engines
-    enum class DrivePower: int { BR, BL, FL, FR };
+    enum { 
+        //DrivePower_DoNotUse1,
+        DrivePower_FR,
+        DrivePower_FL,
+        DrivePower_BR,
+        DrivePower_BL,
+    };
     FVector drive_power_[4];
+    bool wake_flag_ = false;
     
 public:
     // Sets default values for this pawn's properties

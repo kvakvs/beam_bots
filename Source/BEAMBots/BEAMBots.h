@@ -3,7 +3,10 @@
 
 
 #include "Engine.h"
+
 #include "CoreUObject.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/GameMode.h"
 
 #define HMD_MODULE_INCLUDED 0

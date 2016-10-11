@@ -4,6 +4,8 @@
 #include "BEAMBotsToycar.h"
 #include "Engine.h"
 
+#include "GenericPlatformMath.h"
+
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 
@@ -52,12 +54,13 @@ void ABEAMBotsToycar::construct_geometry() {
 void ABEAMBotsToycar::BeginPlay()
 {
     // Physics components of the car
-    FBodyInstance *body = mesh_->GetBodyInstance("CarBody");
-    check(body);
-    body->SetMassOverride(500.0f);
+//    FBodyInstance *body = mesh_->GetBodyInstance("CarBody");
+//    check(body);
+//    body->SetMassOverride(500.0f);
     
     phys_wheel_fr_ = mesh_->GetBodyInstance("WheelFR");
     check(phys_wheel_fr_);
+    
     phys_wheel_fl_ = mesh_->GetBodyInstance("WheelFL");
     check(phys_wheel_fl_);
   
@@ -66,7 +69,6 @@ void ABEAMBotsToycar::BeginPlay()
     for (TActorIterator<ACameraActor> iter(w); iter; ++iter) {
         if (iter->GetName() == OBSERVER_CAMERA_NAME) {
             auto pc = w->GetFirstPlayerController();
-            //auto pc = UGameplayStatics::GetPlayerController(GetWorld(), 0);
             pc->SetViewTarget(*iter, FViewTargetTransitionParams());
             break;
         }
@@ -92,13 +94,16 @@ void ABEAMBotsToycar::SetupPlayerInputComponent(class UInputComponent* pic)
 }
 
 void ABEAMBotsToycar::on_move_forward(float v) {
-    const double STRENGTH = 50.0f;
-    double powr = v == 0.0f ? 0.0f : (v > 0.0f ? STRENGTH : -STRENGTH);
+    const double STRENGTH = -50.0f; // positive strength rotates backwards
+    double powr = (FMath::Abs(v) <= 0.01f)
+                  ? 0.0f
+                  : (v > 0.0f ? STRENGTH : -STRENGTH);
+    FVector pow_vec(-powr, 0, 0);
 
     check(phys_wheel_fr_);
-    phys_wheel_fr_->SetAngularVelocity(FVector(0.0, 0.0, powr), false);
+    phys_wheel_fr_->SetAngularVelocity(pow_vec, false);
     check(phys_wheel_fl_);
-    phys_wheel_fl_->SetAngularVelocity(FVector(0.0, 0.0, powr), false);
+    phys_wheel_fl_->SetAngularVelocity(pow_vec, false);
  
 }
 

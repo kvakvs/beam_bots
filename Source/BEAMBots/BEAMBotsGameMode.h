@@ -17,7 +17,7 @@ class ABEAMBotsGameMode : public AGameMode
 public:
     ABEAMBotsGameMode();
     virtual void StartPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
     
 private:
-    void zmq_listen(uint32 port);
 };

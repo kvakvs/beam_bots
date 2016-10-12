@@ -14,20 +14,18 @@ ABEAMBotsGameMode::ABEAMBotsGameMode(): AGameMode()
     HUDClass = ABEAMBotsHud::StaticClass();
 }
 
-void ABEAMBotsGameMode::zmq_listen(uint32 port)
-{
-    //zmq_ = std::make_unique<BotZMQ>(port);
-    zmq_.Reset(new BotZMQ(port));
-}
-
 void ABEAMBotsGameMode::StartPlay()
 {
     auto mode = GetWorld()->WorldType;
     switch (mode) {
     case EWorldType::Game:
     case EWorldType::PIE:
-        zmq_listen(15000); 
+        zmq_.Reset(new BotZMQ(15000));
     }
     
     AGameMode::StartPlay();
+}
+
+void ABEAMBotsGameMode::Tick(float DeltaSeconds) {
+    zmq_->tick(this);
 }

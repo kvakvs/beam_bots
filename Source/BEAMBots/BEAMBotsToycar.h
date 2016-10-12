@@ -55,4 +55,5 @@ public:
 private:
     void construct_geometry();
     void power_motor(int index, float power);
+    void power_the_motors();
 };

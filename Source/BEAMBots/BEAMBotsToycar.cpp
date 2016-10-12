@@ -12,8 +12,8 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 
-// #define OBSERVER_CAMERA_NAME "TopCamera"
-#define OBSERVER_CAMERA_NAME "TopCloseupCamera"
+#define OBSERVER_CAMERA_NAME "TopCamera"
+//#define OBSERVER_CAMERA_NAME "TopCloseupCamera"
 
 // Sets default values
 ABEAMBotsToycar::ABEAMBotsToycar()
@@ -37,7 +37,8 @@ void ABEAMBotsToycar::construct_geometry() {
     //mesh_->SetMaterial(0, material_helper.Object);
 
     SetRootComponent(mesh_);
-    
+
+    /*
     // Camera
     // Create a spring arm component
     spring_arm_ = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm0"));
@@ -55,11 +56,7 @@ void ABEAMBotsToycar::construct_geometry() {
     cam_->SetupAttachment(spring_arm_, USpringArmComponent::SocketName);
     cam_->bUsePawnControlRotation = false;
     cam_->FieldOfView = 90.f;
-
-    //auto l = CreateDefaultSubobject<UPointLightComponent>(TEXT("FullBeam"));
-    //l->SetRelativeLocation(FVector(60.f, -10.f, 120.f));
-    //l->SetRelativeRotation(FRotator(-180.f, -10.f, -90.f));
-    //l->SetIntensity(25000.f);
+    */
 }
 
 // Called when the game starts or when spawned
@@ -95,7 +92,10 @@ void ABEAMBotsToycar::power_motor(int index, float power) {
 void ABEAMBotsToycar::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    power_the_motors();
+}
 
+void ABEAMBotsToycar::power_the_motors() {
     // Flags if physics should wake on drive or steer
     bool wake_forward = FMath::Abs(forward_) > 0.1f;
     bool wake_steer = FMath::Abs(steer_) > 0.1f;

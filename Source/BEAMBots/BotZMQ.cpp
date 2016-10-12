@@ -23,7 +23,7 @@ void BotZMQ::tick(ABEAMBotsGameMode *gmode) {
     zmq::pollitem_t poll_items[] = {
         {socket_, 0, ZMQ_POLLIN, 0}
     };
-    zmq::poll(poll_items, 1, -1);
+    zmq::poll(poll_items, 1, 0);
     if (poll_items[0].revents & ZMQ_POLLIN) {
         zmq::message_t message;
         socket_.recv(& message);
@@ -48,6 +48,15 @@ void BotZMQ::on_cmd_new_session(ABEAMBotsGameMode *gmode,
     const char *data = static_cast<const char *>(m.data());
     FString player_name = read_string(m, 1);
     UE_LOG(LogTemp, Log, TEXT("Login for %s"), *player_name);
+    
+    // Compose and send reply
+    uint64_t sid = 123;
+    char msg[sizeof(sid)+1];
+    
+    msg[0] = (char)ProtocolCmd::NEW_SESSION;
+    memcpy(msg+1, &sid, sizeof(sid));
+    
+    socket_.send(&msg, sizeof(sid)+1);
 }
     
 void BotZMQ::on_cmd_reset(ABEAMBotsGameMode *gmode,

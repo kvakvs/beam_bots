@@ -66,6 +66,29 @@ void ABEAMBotsToycar::construct_geometry() {
 void ABEAMBotsToycar::BeginPlay()
 {
     Super::BeginPlay();
+
+    motor_index_FR = mesh_->FindConstraintIndex("WheelFR");
+    motor_index_FL = mesh_->FindConstraintIndex("WheelFL");
+    motor_index_BR = mesh_->FindConstraintIndex("WheelBR");
+    motor_index_BL = mesh_->FindConstraintIndex("WheelBL");
+}
+
+void ABEAMBotsToycar::power_motor(int index, float power) {
+    FVector vt(0.f, power, 0.f);
+    mesh_->Constraints[index]->SetAngularVelocityTarget(vt);
+
+    FString str = FString::Printf(TEXT("%.1f"), power);
+    DrawDebugString(GetWorld(),
+                    mesh_->Constraints[index]->GetConstraintLocation(),
+                    str,
+                    NULL, FColor::White, 0.01f);
+//    FVector force = drive_power_[DrivePower_FL];
+//    FVector application_point = mesh_->Constraints[DrivePower_FL]->GetConstraintLocation();
+//    force.Normalize();
+//    force *= 2000.f;
+//    force = rot.RotateVector(force);
+//    mesh_->AddForceAtLocation(force, application_point);
+//    DrawDebugLine(GetWorld(), application_point, application_point+force, FColor(255,0,0));
 }
 
 // Called every frame
@@ -73,30 +96,33 @@ void ABEAMBotsToycar::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (wake_flag_) {
-        wake_flag_ = false;
+    // Flags if physics should wake on drive or steer
+    bool wake_forward = FMath::Abs(forward_) > 0.1f;
+    bool wake_steer = FMath::Abs(steer_) > 0.1f;
+    static const float ANG_VELOCITY = 1.0f;
+    
+    if (wake_forward) {
+        forward_ *= ANG_VELOCITY;
+        power_motor(motor_index_FL, -forward_);
+        power_motor(motor_index_BL, -forward_);
+        power_motor(motor_index_FR, -forward_);
+        power_motor(motor_index_BR, -forward_);
+    } else if (wake_steer) {
+        power_motor(motor_index_FL, -steer_);
+        power_motor(motor_index_BL, -steer_);
+        power_motor(motor_index_FR, steer_);
+        power_motor(motor_index_BR, steer_);
+    } else {
+        // Stop motors
+        power_motor(motor_index_FL, 0.f);
+        power_motor(motor_index_FR, 0.f);
+        power_motor(motor_index_BL, 0.f);
+        power_motor(motor_index_BR, 0.f);
+    }
+
+    if (wake_forward || wake_steer) {
         mesh_->WakeAllRigidBodies();
     }
-    for (auto i = 0; i < mesh_->Constraints.Num(); ++i) {
-        mesh_->Constraints[i]->SetAngularVelocityTarget(drive_power_[i]);
-    }
-
-    FVector dir = FRotationMatrix(GetActorRotation()).GetScaledAxis(EAxis::X);
-    dir.Normalize();
-
-    FVector fl = drive_power_[DrivePower_FL];
-    fl.Normalize();
-    fl *= 2000.f;
-    fl *= dir;
-    mesh_->AddImpulseAtLocation(
-        fl, mesh_->Constraints[DrivePower_FL]->GetConstraintLocation());
-
-    FVector fr = drive_power_[DrivePower_FR];
-    fr.Normalize();
-    fr *= 2000.f;
-    fr *= dir;
-    mesh_->AddImpulseAtLocation(
-        fr, mesh_->Constraints[DrivePower_FR]->GetConstraintLocation());
 }
 
 // Called to bind functionality to input
@@ -108,31 +134,10 @@ void ABEAMBotsToycar::SetupPlayerInputComponent(class UInputComponent* pic)
     pic->BindAxis("MoveRight", this, &ABEAMBotsToycar::on_move_right);
 }
 
-// Converts input from player controller to physical angular velocity for
-// applying to wheels.
-static float input_v_to_angular_velocity(float v) {
-    const double ROT_VELOCITY = 90.0f;
-    return (FMath::Abs(v) <= 0.01f)
-        ? 0.0f
-        : (v > 0.0f ? ROT_VELOCITY : -ROT_VELOCITY);
-}
-
-static FVector get_power_vector(float power) {
-    return FVector(0.f, power, 0.f);
-}
-
 void ABEAMBotsToycar::on_move_forward(float v) {
-    float powr = input_v_to_angular_velocity(v);
-    wake_flag_ |= FMath::Abs(v) > 0.1f;
-    drive_power_[DrivePower_FL] = drive_power_[DrivePower_BL] = get_power_vector(powr);
-    drive_power_[DrivePower_FR] = drive_power_[DrivePower_BR] = get_power_vector(powr);
+    forward_ = v;
 }
 
 void ABEAMBotsToycar::on_move_right(float v) {
-    float powr = input_v_to_angular_velocity(v) * 1.2f;
-    if (FMath::Abs(v) > 0.1f) {
-        wake_flag_ |= true;
-        drive_power_[DrivePower_FL] = drive_power_[DrivePower_BL] = get_power_vector(powr);
-        drive_power_[DrivePower_FR] = drive_power_[DrivePower_BR] = get_power_vector(-powr);
-    }
+    steer_ = v;
 }

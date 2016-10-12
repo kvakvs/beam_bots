@@ -28,15 +28,12 @@ public:
     UCameraComponent* cam_;
     
     // Controls affect power on the engines
-    enum { 
-        //DrivePower_DoNotUse1,
-        DrivePower_FR,
-        DrivePower_FL,
-        DrivePower_BR,
-        DrivePower_BL,
-    };
-    FVector drive_power_[4];
-    bool wake_flag_ = false;
+    int motor_index_FR = 0;
+    int motor_index_FL = 0;
+    int motor_index_BR = 0;
+    int motor_index_BL = 0;
+    float forward_ = 0.f;
+    float steer_ = 0.f;
     
 public:
     // Sets default values for this pawn's properties
@@ -57,4 +54,5 @@ public:
 
 private:
     void construct_geometry();
+    void power_motor(int index, float power);
 };

@@ -16,13 +16,9 @@ To play the game, user should:
 To read the sensors and world state, user can:
 
 *   Run SEE_SELF command to know bot's location. Origin is located under the back
-    bumper of the toy car.
+    bumper of the toy car (not the most brilliant location yes).
 *   Run SEE_OBSTACLES command, result will come as array of distances to ray cast
     hits. NOTE: That player car silhouettes also come as obstacles.
-
-.. comment:
-    *   Run SEE_BOTS command, result will come as a list of visible player cars in
-    a limited depth cone.
 
 Motor power value unit is revolutions per second.
 Motor strength is hardcoded in the physical model.
@@ -35,8 +31,8 @@ Data types
 ----------
 
 *   Strings are encoded with 32 bit big-endian length, followed by UTF-8 characters
-*   BigEndianFloat32 are encoded as IEEE 32-bit big-endian float.
-*   Signed- and UInts are encoded big-endian.
+*   Float32 are encoded as IEEE 32-bit big-endian float.
+*   Signed- and Unsigned Ints are encoded big-endian.
 
 NEW_SESSION
 -----------
@@ -45,8 +41,8 @@ This sets up a player session, no car is spawned. To spawn a car see RESET comma
 Session will expire if no commands are sent to it in 60 seconds.
 
 *   Client: Write byte 0x01 which marks a NEW_SESSION command.
-*   Client: Write String player_name.
 *   Client: Write byte with protocol version, which must be 0x00.
+*   Client: Write String player_name.
 
 A reply will be sent to the caller with UInt64 session id. Use this id on
 every subsequent call to control your robot.
@@ -108,7 +104,6 @@ SEE_OBSTACLES
 
 Casts a fan of rays in front of the vehicle. Returns distances to each hit.
 Distance unit is centimeter. RAY_COUNT=16 rays are cast with a RAY_STEP=4° interval.
-Special value 1'000'000.0 means "too far" (beyond the limit of RAY_MAX_DIST=3'000cm or 30m).
 
 *   Client: Write byte 0x05 which marks a SEE_OBSTACLES command.
 *   Client: Write UInt64 session id.
@@ -119,4 +114,6 @@ Response:
 *   Server: Write UInt64 session id.
 *   Server: Write UInt32 = 16 (size of array)
 *   Server: Write 16 Float32 with distances to the nearest collision with
-    the geometry or another car.
+    the geometry or another car. Special value 1'000'000.0 means "too far"
+    (beyond the limit of RAY_MAX_DIST=3'000cm or 30m).
+

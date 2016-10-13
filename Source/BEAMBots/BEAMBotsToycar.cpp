@@ -12,9 +12,6 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 
-#define OBSERVER_CAMERA_NAME "TopCamera"
-//#define OBSERVER_CAMERA_NAME "TopCloseupCamera"
-
 // Sets default values
 ABEAMBotsToycar::ABEAMBotsToycar()
 {

@@ -4,10 +4,10 @@
 #include "BEAMBotsGameMode.h"
 #include "BotZMQ.h"
 
-enum class ProtocolCmd: unsigned char {
+enum class BotCommand: uint8_t {
     NEW_SESSION = 0x01,
-    RESET = 0x02,
-    CTL_MOTOR = 0x03,
+    RESET       = 0x02,
+    CTL_MOTOR   = 0x03,
 };
     
 static FString read_string(const zmq::message_t &m, int offset);
@@ -36,10 +36,10 @@ void BotZMQ::parse_message(ABEAMBotsGameMode *gmode, const zmq::message_t &m) {
         return;
     }
     const char *data = static_cast<const char *>(m.data());
-    switch (ProtocolCmd(data[0])) {
-        case ProtocolCmd::NEW_SESSION:  return on_cmd_new_session(gmode, m);
-        case ProtocolCmd::RESET:        return on_cmd_reset(gmode, m);
-        case ProtocolCmd::CTL_MOTOR:    return on_cmd_ctl_motor(gmode, m);
+    switch (BotCommand(data[0])) {
+        case BotCommand::NEW_SESSION:  return on_cmd_new_session(gmode, m);
+        case BotCommand::RESET:        return on_cmd_reset(gmode, m);
+        case BotCommand::CTL_MOTOR:    return on_cmd_ctl_motor(gmode, m);
     }
 }
 
@@ -47,16 +47,15 @@ void BotZMQ::on_cmd_new_session(ABEAMBotsGameMode *gmode,
                                 const zmq::message_t &m) {
     const char *data = static_cast<const char *>(m.data());
     FString player_name = read_string(m, 1);
+    BotSessionId sid = gmode->bot_new_session(player_name);
     UE_LOG(LogTemp, Log, TEXT("Login for %s"), *player_name);
     
     // Compose and send reply
-    uint64_t sid = 123;
-    char msg[sizeof(sid)+1];
+    BotProtocol message(9);
+    message.write_u8((uint8_t)BotCommand::NEW_SESSION);
+    message.write_u64(sid);
     
-    msg[0] = (char)ProtocolCmd::NEW_SESSION;
-    memcpy(msg+1, &sid, sizeof(sid));
-    
-    socket_.send(&msg, sizeof(sid)+1);
+    socket_.send(message.data(), message.size());
 }
     
 void BotZMQ::on_cmd_reset(ABEAMBotsGameMode *gmode,

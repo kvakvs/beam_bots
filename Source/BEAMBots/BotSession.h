@@ -38,3 +38,13 @@ public:
     FRotator rotation_;
 };
 
+class BotResponse_SeeObstacles {
+public:
+    bool is_good_ = false;
+    // Contains distances to obstacle for casted rays.
+    // Special value 1'000'000.0 means "too far" beyond the limit
+    // of RAY_MAX_DIST=3'000cm.
+    TArray<double> distances_;
+    // Angle step. Default RAY_STEP=4°
+    double ray_angle_step_;
+};

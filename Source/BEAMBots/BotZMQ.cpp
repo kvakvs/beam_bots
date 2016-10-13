@@ -128,7 +128,19 @@ void BotZMQ::on_cmd_see_self(ABEAMBotsGameMode *gmode,
 
 void BotZMQ::on_cmd_see_obstacles(ABEAMBotsGameMode *gmode,
                                   BotProtocolReader &reader) {
-    
+    auto sid = reader.read_u64();
+    BotResponse_SeeObstacles info = gmode->bot_see_obstacles(sid);
+    if (not info.is_good_) {
+        return send_error(sid, "SEE_OBSTACLES command failed");
+    }
+    BotProtocol message;
+    message.write_u8((uint8_t)BotCommand::SEE_OBSTACLES);
+    message.write_u64(sid);
+    message.write_u32(info.distances_.Num());
+    for (auto d: info.distances_) {
+        message.write_f32(d);
+    }
+    socket_.send(message.data(), message.size());
 }
 
 void BotZMQ::send_error(BotSessionId sid, FString e) {

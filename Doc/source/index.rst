@@ -15,7 +15,7 @@ To play the game, user should:
 
 To read the sensors and world state, user can:
 
-*   Run SEE_SELF command to know bot's location. Origin is located under the front
+*   Run SEE_SELF command to know bot's location. Origin is located under the back
     bumper of the toy car.
 *   Run SEE_OBSTACLES command, result will come as array of distances to ray cast
     hits. NOTE: That player car silhouettes also come as obstacles.
@@ -107,7 +107,8 @@ SEE_OBSTACLES
 -------------
 
 Casts a fan of rays in front of the vehicle. Returns distances to each hit.
-16 rays are cast with a 3° interval.
+Distance unit is centimeter. RAY_COUNT=16 rays are cast with a RAY_STEP=4° interval.
+Special value 1'000'000.0 means "too far" (beyond the limit of RAY_MAX_DIST=3'000cm or 30m).
 
 *   Client: Write byte 0x05 which marks a SEE_OBSTACLES command.
 *   Client: Write UInt64 session id.

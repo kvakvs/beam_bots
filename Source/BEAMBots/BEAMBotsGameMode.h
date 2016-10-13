@@ -30,5 +30,6 @@ public:
     bool bot_control_motors(BotSessionId sid, double fl, double fr,
                             double bl, double br);
     BotResponse_SeeSelf bot_see_self(BotSessionId sid);
+    BotResponse_SeeObstacles bot_see_obstacles(BotSessionId sid);
 private:
 };

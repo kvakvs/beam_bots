@@ -1,5 +1,5 @@
-BEAM Bots Protocol 0.1
-======================
+BEAM Bots Protocol version 0x00
+===============================
 
 BEAM Bots game is controlled via ZeroMQ RPC started (by default) on port 15000.
 Commands are encoded in a binary format.
@@ -13,13 +13,28 @@ To play the game, user should:
 4.  To stop the car, send a CTL_FORWARD command with 0.0 as power or CTL_MOTOR
     command with 0.0 power on all wheels.
 
+To read the sensors and world state, user can:
+
+*   Run SEE_SELF command to know bot's location. Origin is located under the front
+    bumper of the toy car.
+*   Run SEE_OBSTACLES command, result will come as array of distances to ray cast
+    hits. NOTE: That player car silhouettes also come as obstacles.
+
+.. comment:
+    *   Run SEE_BOTS command, result will come as a list of visible player cars in
+    a limited depth cone.
+
 Motor power value unit is revolutions per second.
 Motor strength is hardcoded in the physical model.
+
+For any command server may return 0x00 as first byte, followed by an error string.
+When error is returned: Read 64-bit session id (or zero if no session is present),
+then read 32-bit Uint32 length and UTF-8 bytes.
 
 Data types
 ----------
 
-*   ShortString are encoded with 8 bit length, followed by ASCII characters
+*   Strings are encoded with 32 bit big-endian length, followed by UTF-8 characters
 *   BigEndianFloat32 are encoded as IEEE 32-bit big-endian float.
 *   Signed- and UInts are encoded big-endian.
 
@@ -30,7 +45,8 @@ This sets up a player session, no car is spawned. To spawn a car see RESET comma
 Session will expire if no commands are sent to it in 60 seconds.
 
 *   Client: Write byte 0x01 which marks a NEW_SESSION command.
-*   Client: Write ShortString player name.
+*   Client: Write String player_name.
+*   Client: Write byte with protocol version, which must be 0x00.
 
 A reply will be sent to the caller with UInt64 session id. Use this id on
 every subsequent call to control your robot.
@@ -70,27 +86,36 @@ Response:
 *   Server: Write byte CTL_MOTOR=0x03
 *   Server: Write UInt64 session id.
 
-.. comment:
-    CTL_FORWARD
-    -----------
-    Commands motors to spin, pushing the car forward.
-    Has same effect as low level CTL_MOTOR with same value repeated 4 times.
-    Positive values will push the car forward.
-    *   Client: Write byte 0x80 which marks a CTL_FORWARD command.
-    *   Client: Write U64 session id.
-    *   Client: Write 1 Float32 with power, which will be applied to all 4 motors
-        permanently until the next command.
-    There is no server response to this command.
-    CTL_STEER
-    ---------
-    Commands motors to spin in opposite directions, slowly rotating the car.
-    Has same effect as low level CTL_MOTOR with opposite power values applied to
-    the left and to the right sides of the car.
-    Positive steer value will turn clockwise (right), negative steer will turn
-    counter-clockwise (left).
-    *   Client: Write byte 0x81 which marks a CTL_STEER command.
-    *   Client: Write U64 session id.
-    *   Client: Write 1 Float32 with power, which will be applied to motors
-        permanently until the next command.
-    There is no server response to this command.
+SEE_SELF
+--------
 
+Returns information about bot's current position and state.
+
+*   Client: Write byte 0x04 which marks a SEE_SELF command.
+*   Client: Write UInt64 session id.
+
+Response:
+
+*   Server: Write byte SEE_SELF=0x04
+*   Server: Write UInt64 session id.
+*   Server: Write 3 Float32 with location.
+    X is up on screen, Y is right on screen, Z axis is vertical.
+*   Server: Write 3 Float32 with orientation {X or Roll, Y or Pitch, Z or Yaw}.
+    Any X or Y orientation value > ±90° means that the car has flipped over.
+
+SEE_OBSTACLES
+-------------
+
+Casts a fan of rays in front of the vehicle. Returns distances to each hit.
+16 rays are cast with a 3° interval.
+
+*   Client: Write byte 0x05 which marks a SEE_OBSTACLES command.
+*   Client: Write UInt64 session id.
+
+Response:
+
+*   Server: Write byte SEE_OBSTACLES=0x05
+*   Server: Write UInt64 session id.
+*   Server: Write UInt32 = 16 (size of array)
+*   Server: Write 16 Float32 with distances to the nearest collision with
+    the geometry or another car.

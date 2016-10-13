@@ -68,7 +68,7 @@ void ABEAMBotsToycar::BeginPlay()
 }
 
 void ABEAMBotsToycar::power_motor(int index, float power) {
-    FVector vt(0.f, power, 0.f);
+    FVector vt(0.f, -power, 0.f);
     mesh_->Constraints[index]->SetAngularVelocityTarget(vt);
 
 //    FString str = FString::Printf(TEXT("%.1f"), power);

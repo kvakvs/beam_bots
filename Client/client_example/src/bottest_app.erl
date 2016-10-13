@@ -21,8 +21,10 @@ start(_StartType, _StartArgs) ->
     B1 = beambots:command_new_session(B0, "Erlang1"),
     io:format("B1 (after new session) ~p~n", [B1]),
     B2 = beambots:command_reset(B1),
-    io:format("B1 (after reset) ~p~n", [B2]),
+    io:format("B2 (after reset) ~p~n", [B2]),
     B3 = beambots:command_control_motors(B2, 1.0, 1.0, 1.0, 1.0),
+    {B4, Loc, Rot} = beambots:command_see_self(B3),
+    io:format("SEE_SELF Location ~p~n         Rotation ~p~n", [Loc, Rot]),
     init:stop().
     %bottest_sup:start_link().
 

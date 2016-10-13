@@ -5,29 +5,7 @@
 #include <memory>
 
 #include "GameFramework/GameMode.h"
-
-class ABEAMBotsToycar;
-
-using BotSessionId = uint64_t;
-class BotSession {
-public:
-    BotSessionId sid_;
-    ABEAMBotsToycar *car_ = nullptr;
-    double last_updated_;
-    FString player_name_;
-
-    BotSession(const BotSession &) = default;
-    BotSession(BotSession &&) = default;
-    
-    BotSession(BotSessionId sid, const FString &name)
-    : sid_(sid), player_name_(name) {
-        touch();
-    }
-    
-    void touch() {
-        last_updated_ = FPlatformTime::Seconds();
-    }
-};
+#include "BotSession.h"
 
 #include "BEAMBotsGameMode.generated.h"
 
@@ -51,5 +29,6 @@ public:
     bool bot_reset(BotSessionId sid);
     bool bot_control_motors(BotSessionId sid, double fl, double fr,
                             double bl, double br);
+    BotResponse_SeeSelf bot_see_self(BotSessionId sid);
 private:
 };

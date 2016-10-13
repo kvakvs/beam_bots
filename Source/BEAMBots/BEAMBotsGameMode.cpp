@@ -72,7 +72,7 @@ BotSessionId ABEAMBotsGameMode::bot_new_session(const FString & player_name)
 bool ABEAMBotsGameMode::bot_reset(BotSessionId sid)
 {
     BotSession *s = sessions_.Find(sid);
-    if (s == nullptr) {
+    if (not s) {
         return false;
     }
     
@@ -95,7 +95,7 @@ bool ABEAMBotsGameMode::bot_control_motors(BotSessionId sid,
                                            double bl, double br)
 {
     BotSession *s = sessions_.Find(sid);
-    if (s == nullptr) {
+    if (not s) {
         return false;
     }
     
@@ -105,4 +105,18 @@ bool ABEAMBotsGameMode::bot_control_motors(BotSessionId sid,
     s->car_->power_motor(s->car_->motor_index_BR, br);
     s->touch();
     return true;
+}
+
+BotResponse_SeeSelf ABEAMBotsGameMode::bot_see_self(BotSessionId sid) {
+    BotResponse_SeeSelf result;
+    BotSession *s = sessions_.Find(sid);
+
+    if (not s or not s->car_) {
+        return result; // has is_good_ == false
+    }
+
+    result.is_good_ = true;
+    result.location_ = s->car_->GetActorLocation();
+    result.rotation_ = s->car_->GetActorRotation();
+    return result;
 }

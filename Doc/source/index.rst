@@ -21,7 +21,7 @@ Data types
 
 *   ShortString are encoded with 8 bit length, followed by ASCII characters
 *   BigEndianFloat32 are encoded as IEEE 32-bit big-endian float.
-*   Signed- and UnsignedInts are encoded big-endian.
+*   Signed- and UInts are encoded big-endian.
 
 NEW_SESSION
 -----------
@@ -32,11 +32,13 @@ Session will expire if no commands are sent to it in 60 seconds.
 *   Client: Write byte 0x01 which marks a NEW_SESSION command.
 *   Client: Write ShortString player name.
 
-A reply will be sent to the caller with UnsignedInt64 session id. Use this id on
+A reply will be sent to the caller with UInt64 session id. Use this id on
 every subsequent call to control your robot.
 
-*   Client: Read byte 0x01 which marks a response to NEW_SESSION
-*   Client: Read UInt64 session id.
+Response:
+
+*   Server: Write byte 0x01 which marks a response to NEW_SESSION
+*   Server: Write UInt64 session id.
 
 RESET
 -----
@@ -45,9 +47,12 @@ Spawns a car on the playing field. If car already existed, it will be deleted.
 Use this command to begin playing or to restart if your car is stuck or flipped over.
 
 *   Client: Write byte 0x02 which marks a RESET command.
-*   Client: Write U64 session id.
+*   Client: Write UInt64 session id.
 
-There is no server response to this command.
+Response:
+
+*   Server: Write byte RESET=0x02
+*   Server: Write UInt64 session id.
 
 CTL_MOTOR
 ---------
@@ -56,11 +61,14 @@ Low level motor control command which stops wheel motors.
 Power values are applied to motors permanently until the next command.
 
 *   Client: Write byte 0x03 which marks a CTL_MOTOR command.
-*   Client: Write U64 session id.
+*   Client: Write UInt64 session id.
 *   Client: Write 4 Float32 with motor power for FrontLeft,
     FrontRight, BackLeft, and BackRight wheels.
 
-There is no server response to this command.
+Response:
+
+*   Server: Write byte CTL_MOTOR=0x03
+*   Server: Write UInt64 session id.
 
 .. comment:
     CTL_FORWARD

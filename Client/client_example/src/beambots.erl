@@ -51,7 +51,7 @@ command_new_session(#beambots{} = BEAMBots, Name) ->
 command_reset(#beambots{session_id=Sid} = BEAMBots) ->
     Message = <<?CMD_RESET:8, Sid:64/big>>,
     zmq_send(BEAMBots, Message),
-    %% No reply to expect
+    <<?CMD_RESET:8, Sid:64/big>> = zmq_recv(BEAMBots),
     BEAMBots.
 
 %% @doc Sends power to toy car motors in this order:
@@ -67,8 +67,8 @@ command_control_motors(#beambots{session_id=Sid} = BEAMBots, FL, FR, BL, BR) ->
                 FR:32/float-big,
                 BL:32/float-big,
                 BR:32/float-big>>,
-    zmq:send(BEAMBots, Message),
-    %% No reply to expect
+    zmq_send(BEAMBots, Message),
+    <<?CMD_CTL_MOTOR:8, Sid:64/big>> = zmq_recv(BEAMBots),
     BEAMBots.
 
 %%====================================================================

@@ -14,12 +14,16 @@ public:
     BotSessionId sid_;
     ABEAMBotsToycar *car_ = nullptr;
     double last_updated_;
+    FString player_name_;
 
     BotSession(const BotSession &) = default;
     BotSession(BotSession &&) = default;
-    BotSession() {
+    
+    BotSession(BotSessionId sid, const FString &name)
+    : sid_(sid), player_name_(name) {
         touch();
     }
+    
     void touch() {
         last_updated_ = FPlatformTime::Seconds();
     }
@@ -45,5 +49,7 @@ public:
     
     BotSessionId bot_new_session(const FString &player_name);
     bool bot_reset(BotSessionId sid);
+    bool bot_control_motors(BotSessionId sid, double fl, double fr,
+                            double bl, double br);
 private:
 };

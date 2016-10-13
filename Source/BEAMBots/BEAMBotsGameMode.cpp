@@ -44,18 +44,27 @@ void ABEAMBotsGameMode::Tick(float dt) {
                 expired_ids.Add(ses.Key);
             }
         }
+        
+        for (BotSessionId id: expired_ids) {
+            BotSession *s = sessions_.Find(id);
+            if (s->car_) {
+                s->car_->Destroy();
+                s->car_ = nullptr;
+            }
+        }
     }
 }
 
 BotSessionId ABEAMBotsGameMode::bot_new_session(const FString & player_name)
 {
-    BotSession s;
-    
+    BotSessionId sid = 0;
     do {
         // Assign a random number sid until it's unique
-        s.sid_ = ((uint64_t)FMath::Rand() << 32) ^ FMath::Rand();
-    } while (sessions_.Find(s.sid_) != nullptr);
-
+        sid = ((uint64_t)FMath::Rand() << 32) ^ FMath::Rand();
+    } while (sessions_.Find(sid) != nullptr);
+    
+    BotSession s(sid, player_name);
+    
     sessions_.Add(s.sid_, s);
     return s.sid_;
 }
@@ -67,9 +76,33 @@ bool ABEAMBotsGameMode::bot_reset(BotSessionId sid)
         return false;
     }
     
+    if (s->car_) {
+        // Despawn old car first
+        s->car_->Destroy();
+        s->car_ = nullptr;
+    }
+    
     auto world = GetWorld();
     check(world);
     s->car_ = world->SpawnActor<ABEAMBotsToycar>(ABEAMBotsToycar::StaticClass());
+    s->car_->player_name_ = s->player_name_;
+    s->touch();
+    return true;
+}
+
+bool ABEAMBotsGameMode::bot_control_motors(BotSessionId sid,
+                                           double fl, double fr,
+                                           double bl, double br)
+{
+    BotSession *s = sessions_.Find(sid);
+    if (s == nullptr) {
+        return false;
+    }
+    
+    s->car_->power_motor(s->car_->motor_index_FL, fl);
+    s->car_->power_motor(s->car_->motor_index_FR, fr);
+    s->car_->power_motor(s->car_->motor_index_BL, bl);
+    s->car_->power_motor(s->car_->motor_index_BR, br);
     s->touch();
     return true;
 }

@@ -22,6 +22,7 @@ start(_StartType, _StartArgs) ->
     io:format("B1 (after new session) ~p~n", [B1]),
     B2 = beambots:command_reset(B1),
     io:format("B1 (after reset) ~p~n", [B2]),
+    B3 = beambots:command_control_motors(B2, 1.0, 1.0, 1.0, 1.0),
     init:stop().
     %bottest_sup:start_link().
 

@@ -3,6 +3,7 @@ Intermediate/*
 Saved/*
 Build/*
 *.bak
+Release/*
 
 # Blender backups
 *.blend1

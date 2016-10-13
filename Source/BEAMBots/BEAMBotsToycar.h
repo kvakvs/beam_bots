@@ -34,6 +34,7 @@ public:
     int motor_index_BL = 0;
     float forward_ = 0.f;
     float steer_ = 0.f;
+    FString player_name_;
     
 public:
     // Sets default values for this pawn's properties
@@ -51,9 +52,9 @@ public:
 
     void on_move_forward(float v);
     void on_move_right(float v);
-
+    void power_motor(int index, float power);
+    
 private:
     void construct_geometry();
-    void power_motor(int index, float power);
     void power_the_motors();
 };
